@@ -1,7 +1,7 @@
 import * as React from "react";
 import styled from "styled-components";
 
-import { GameData } from "./types";
+import { GameData, Pick } from "./types";
 import { sortBy, throttle } from "lodash";
 
 const ModalWrapper = styled.div`
@@ -11,9 +11,6 @@ const ModalWrapper = styled.div`
   top: 0;
   left: 0;
   background-color: rgba(0,0,0,0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
 `
 
 const Closer = styled.div`
@@ -31,6 +28,9 @@ const ModalBox = styled.div`
   border: 1px solid #cecece;
   z-index: 1;
   padding: 0;
+  top: 10vh;
+  left: 20vw;
+  position: fixed;
 `
 
 const ModalHeader = styled.div`
@@ -47,6 +47,12 @@ const ModalHeader = styled.div`
   }
 `
 
+const ModalBodyInner = styled.div`
+  max-height: 300px;
+  overflow: scroll; 
+  box-sizing: border-box;
+`
+
 const ModalBody = styled.div`
   width: 100%;
   padding: 14px;
@@ -58,34 +64,41 @@ const ModalBody = styled.div`
     border: 0;
     border-bottom: 1px solid #cecece;
     background-color: papayawhip;
+    margin-bottom: 14px;
 
     &:focus-visible, &:focus {
       outline: none;
       border-bottom: 2px solid #cecece;
     }
   }
+
+  button {
+    margin-top: 14px;
+    background-color: blue;
+    color: white;
+    cursor: pointer;
+  }
+
 `
 
-const ModalBodyInner = styled.div`
-  max-height: 300px;
-  overflow: scroll; 
-  padding: 14px 0;
-  box-sizing: border-box;
-`
 
 type Props = {
   target: [number, number] | false
   setShowModal: (modal: [number, number] | false) => void,
   data: GameData
+  picks: Array<Array<Pick | null>>,
+  setPicks: (picks: Array<Array<Pick | null>>) => void
 }
 
-export const Modal = ({ target, setShowModal, data }: Props) => {
+export const Modal = ({ target, setShowModal, data, picks, setPicks }: Props) => {
   const hideModal = React.useCallback(() => {
     setShowModal(false)
   }, [setShowModal])
   const [searchValue, setSearchValue] = React.useState<string>("")
+  const [guessValue, setGuessValue] = React.useState<Pick | null>(null)
   const onSearchChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue(e.target.value)
+    setGuessValue(null)
   }, [setSearchValue])
   const [options, setOptions] = React.useState<Array<any>>([])
   const search = React.useCallback(throttle((value) => {
@@ -99,8 +112,7 @@ export const Modal = ({ target, setShowModal, data }: Props) => {
       const results = data["results"]
       if (!results) return null
 
-      const cleanedResults = sortBy(results.filter((result: any) => result["backdrop_path"]), (result: any) => -1 * result["vote_count"])
-      console.log(cleanedResults)
+      const cleanedResults = sortBy(results.filter((result: any) => result["poster_path"]), (result: any) => -1 * result["vote_count"])
       setOptions(cleanedResults)
     }
 
@@ -110,6 +122,14 @@ export const Modal = ({ target, setShowModal, data }: Props) => {
   React.useEffect(() => {
     search(searchValue)
   }, [searchValue])
+
+  const onGuess = React.useCallback(() => {
+    if (!target || !guessValue) return
+    picks[target[0]][target[1]] = guessValue
+    setPicks(picks)
+    setShowModal(false)
+  }, [guessValue, setPicks, picks, target])
+
 
   if (target === false) {
     return null
@@ -124,11 +144,18 @@ export const Modal = ({ target, setShowModal, data }: Props) => {
           <h5>{data.columns[target[1]]} x {data.rows[target[0]]}</h5>
         </ModalHeader>
         <ModalBody>
-          <div><input value={searchValue} onChange={onSearchChange} /></div>
-          <ModalBodyInner>
+          <input value={guessValue?.title || searchValue} onChange={onSearchChange} />
+          {!guessValue && (
+            <ModalBodyInner>
 
-            {options.map((option) => <Option key={option["id"]} data={option} />)}
-          </ModalBodyInner>
+              {options.map((option) => <Option key={option["id"]} setGuessValue={setGuessValue} data={option} />)}
+            </ModalBodyInner>
+          )}
+          {guessValue && (
+            <div>
+              <button onClick={onGuess}>Guess</button>
+            </div>
+          )}
         </ModalBody>
       </ModalBox>
     </ModalWrapper>
@@ -140,6 +167,12 @@ const OptionRow = styled.div`
   cursor: pointer;
 `
 
-const Option = ({ data }: any) => {
-  return (<OptionRow>{data["title"]}</OptionRow>)
+type OptionProps = {
+  option: Pick,
+  setGuessValue: (value: Pick) => void
+}
+
+const Option = ({ data, setGuessValue }: any) => {
+  const onClick = React.useCallback(() => { setGuessValue(data) }, [data])
+  return (<OptionRow onClick={onClick}>{data["title"]}</OptionRow>)
 }

@@ -1,7 +1,7 @@
 import * as React from "react";
 import styled from "styled-components";
 import { Modal } from "./modal";
-import { GameData } from "./types";
+import { GameData, Pick } from "./types";
 
 const Wrapper = styled.div`
   display: flex;
@@ -18,13 +18,16 @@ const Board = styled.div`
   height: 80vh;
 `
 
-const Cell = styled.div<{ $bottom?: boolean, $right?: boolean }>`
+const Cell = styled.div<{ $bottom?: boolean, $right?: boolean, $poster?: string | null }>`
   box-sizing: border-box;
   border-top: 1px solid black;
   border-left: 1px solid black;
   border-right: ${props => props.$right && "1px solid black"};
   border-bottom: ${props => props.$bottom && "1px solid black"};
   cursor: pointer;
+  background: url(${props => props.$poster});
+  background-size: cover;
+  background-position: center center;
 `
 
 const Label = styled.div`
@@ -40,6 +43,8 @@ export const Gameboard = () => {
     rows: ["Liza Minnelli", "Someone gets shot", "Features a dog"],
   }
 
+  const [picks, setPicks] = React.useState<Array<Array<Pick | null>>>([[null, null, null], [null, null, null], [null, null, null]])
+
   const [showModal, setShowModal] = React.useState<[number, number] | false>(false)
 
 
@@ -51,13 +56,13 @@ export const Gameboard = () => {
         {data.rows.map((r, i) => (
           <React.Fragment key={r}>
             <Label key={`label-${r}`}>{r}</Label>
-            <CellBox key={`${r}-${0}`} showModal={showModal} setShowModal={setShowModal} row={i} column={0} ></CellBox>
-            <CellBox key={`${r}-${1}`} showModal={showModal} setShowModal={setShowModal} row={i} column={1} ></CellBox>
-            <CellBox key={`${r}-${2}`} showModal={showModal} setShowModal={setShowModal} row={i} column={2} ></CellBox>
+            <CellBox picks={picks} key={`${r}-${0}`} showModal={showModal} setShowModal={setShowModal} row={i} column={0} ></CellBox>
+            <CellBox picks={picks} key={`${r}-${1}`} showModal={showModal} setShowModal={setShowModal} row={i} column={1} ></CellBox>
+            <CellBox picks={picks} key={`${r}-${2}`} showModal={showModal} setShowModal={setShowModal} row={i} column={2} ></CellBox>
           </React.Fragment>
         ))}
       </Board>
-      <Modal data={data} target={showModal} setShowModal={setShowModal} />
+      <Modal picks={picks} setPicks={setPicks} data={data} target={showModal} setShowModal={setShowModal} />
     </Wrapper>
   )
 }
@@ -66,15 +71,19 @@ type CellBoxProps = {
   setShowModal: (modal: [number, number] | false) => void,
   showModal: [number, number] | false,
   row: number,
-  column: number
+  column: number,
+  picks: Array<Array<Pick | null>>
 }
 
-const CellBox = ({ showModal, setShowModal, row, column }: CellBoxProps) => {
+const CellBox = ({ showModal, setShowModal, row, column, picks }: CellBoxProps) => {
   const onClick = React.useCallback(() => {
     setShowModal([row, column])
   }, [])
+  console.log(picks)
+
+  const pick = picks[row][column]
 
   return (
-    <Cell $bottom={row === 2} $right={column === 2} onClick={onClick}></Cell>
+    <Cell $bottom={row === 2} $right={column === 2} onClick={onClick} $poster={pick && `https://image.tmdb.org/t/p/original/${pick["poster_path"]}`}></Cell>
   )
 }
