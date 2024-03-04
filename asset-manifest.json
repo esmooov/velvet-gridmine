@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/velvet-gridmine/static/css/main.f855e6bc.css",
-    "main.js": "/velvet-gridmine/static/js/main.4037c25f.js",
+    "main.js": "/velvet-gridmine/static/js/main.5d970a3f.js",
     "static/js/453.1e98e08a.chunk.js": "/velvet-gridmine/static/js/453.1e98e08a.chunk.js",
     "index.html": "/velvet-gridmine/index.html",
     "main.f855e6bc.css.map": "/velvet-gridmine/static/css/main.f855e6bc.css.map",
-    "main.4037c25f.js.map": "/velvet-gridmine/static/js/main.4037c25f.js.map",
+    "main.5d970a3f.js.map": "/velvet-gridmine/static/js/main.5d970a3f.js.map",
     "453.1e98e08a.chunk.js.map": "/velvet-gridmine/static/js/453.1e98e08a.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.f855e6bc.css",
-    "static/js/main.4037c25f.js"
+    "static/js/main.5d970a3f.js"
   ]
 }
