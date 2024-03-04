@@ -1,5 +1,7 @@
 import * as React from "react";
 import styled from "styled-components";
+import { Modal } from "./modal";
+import { GameData } from "./types";
 
 const Wrapper = styled.div`
   display: flex;
@@ -22,6 +24,7 @@ const Cell = styled.div<{ $bottom?: boolean, $right?: boolean }>`
   border-left: 1px solid black;
   border-right: ${props => props.$right && "1px solid black"};
   border-bottom: ${props => props.$bottom && "1px solid black"};
+  cursor: pointer;
 `
 
 const Label = styled.div`
@@ -32,23 +35,46 @@ const Label = styled.div`
 `
 
 export const Gameboard = () => {
-  const columns = ["Gena Rowlands", "Criterion", "Never nominated for an Oscar"]
-  const rows = ["Liza Minnelli", "Someone gets shot", "Features a dog"]
+  const data: GameData = {
+    columns: ["Gena Rowlands", "Criterion", "Never nominated for an Oscar"],
+    rows: ["Liza Minnelli", "Someone gets shot", "Features a dog"],
+  }
+
+  const [showModal, setShowModal] = React.useState<[number, number] | false>(false)
+
 
   return (
     <Wrapper>
       <Board>
         <div></div>
-        {columns.map(c => <Label>{c}</Label>)}
-        {rows.map((r, i) => (
-          <>
-            <Label>{r}</Label>
-            <Cell $bottom={i == 2}></Cell>
-            <Cell $bottom={i == 2}></Cell>
-            <Cell $right={true} $bottom={i == 2}></Cell>
-          </>
+        {data.columns.map(c => <Label key={c}>{c}</Label>)}
+        {data.rows.map((r, i) => (
+          <React.Fragment key={r}>
+            <Label key={`label-${r}`}>{r}</Label>
+            <CellBox key={`${r}-${0}`} showModal={showModal} setShowModal={setShowModal} row={i} column={0} ></CellBox>
+            <CellBox key={`${r}-${1}`} showModal={showModal} setShowModal={setShowModal} row={i} column={1} ></CellBox>
+            <CellBox key={`${r}-${2}`} showModal={showModal} setShowModal={setShowModal} row={i} column={2} ></CellBox>
+          </React.Fragment>
         ))}
       </Board>
+      <Modal data={data} target={showModal} setShowModal={setShowModal} />
     </Wrapper>
+  )
+}
+
+type CellBoxProps = {
+  setShowModal: (modal: [number, number] | false) => void,
+  showModal: [number, number] | false,
+  row: number,
+  column: number
+}
+
+const CellBox = ({ showModal, setShowModal, row, column }: CellBoxProps) => {
+  const onClick = React.useCallback(() => {
+    setShowModal([row, column])
+  }, [])
+
+  return (
+    <Cell $bottom={row === 2} $right={column === 2} onClick={onClick}></Cell>
   )
 }
