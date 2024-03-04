@@ -31,6 +31,11 @@ const ModalBox = styled.div`
   top: 10vh;
   left: 20vw;
   position: fixed;
+
+  @media (orientation: portrait) {
+    left: 5vw;
+    width: 90vw;
+  }
 `
 
 const ModalHeader = styled.div`

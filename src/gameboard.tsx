@@ -16,6 +16,11 @@ const Board = styled.div`
   grid-template-rows: 100px repeat(3, 1fr);
   width: 60vh;
   height: 80vh;
+
+  @media (orientation: portrait) {
+    width: 80vw;
+    height: 140vw;
+  }
 `
 
 const Cell = styled.div<{ $bottom?: boolean, $right?: boolean, $poster?: string | null }>`
